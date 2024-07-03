@@ -52,4 +52,13 @@ fn transform_code(code: &String, dg_directive: &str) -> Vec<String> {
     }
     new_code
 }
+
+#[test]
+fn test_transform_code() {
+    let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" }";
+    let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
+    assert_eq!(
+        transform_code(&rust_msg.to_string(), DG_ERROR),
+        vec![dg_msg.to_string()]
+    );
 }
