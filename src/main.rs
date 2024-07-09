@@ -8,40 +8,41 @@ struct Cli {
     file: path::PathBuf,
 }
 
-const DG_ERROR: &str = "//~^ ERROR ";
+const RUSTTEST_ERROR: &str = "//~^ ERROR ";
+const DG_ERROR: &str = "// { dg-error \"";
 
-fn main() {
-    if let Err(error) = try_parse() {
-        eprintln!("Error: {:?}", error);
-        process::exit(1);
-    }
+fn main() -> Result<()> {
+    try_parse()
 }
 
 fn try_parse() -> Result<()> {
     let args = Cli::parse();
 
     if !args.file.exists() {
+        // TODO: return a proper error type about how the file wasn't found/doesn't exist
         panic!("File {:?} not found", args.file);
     }
 
-    let code = fs::read_to_string(&args.file).expect("Failed to read file");
+    let code = fs::read_to_string(&args.file)?;
 
-    let new_code = transform_code(&code, DG_ERROR);
+    let new_code = transform_code(&code, RUSTTEST_ERROR);
 
-    fs::remove_file(&args.file).expect("Failed to delete file");
-    fs::write(&args.file, new_code.join("\n")).expect("Failed to write to file");
+    fs::remove_file(&args.file)?;
+    fs::write(&args.file, new_code.join("\n"))?;
 
     Ok(())
 }
 
-fn transform_code(code: &String, dg_directive: &str) -> Vec<String> {
+/// This function takes the rust code and rust directive
+/// and returns the code with dejagnu directive
+fn transform_code(code: &str, rust_directive: &str) -> Vec<String> {
     let mut new_code = Vec::new();
 
     for line in code.lines() {
-        if line.contains(dg_directive) {
+        if line.contains(rust_directive) {
             // replace the rust directive to dejagnu directive
             // TODO: Add more directive relative to rustc
-            let new_line = line.replace(dg_directive, "// { dg-error \"");
+            let new_line = line.replace(rust_directive, DG_ERROR);
 
             // format the line according to dejagnu format
             let new_line = format!("{}\" }}", new_line);
@@ -53,12 +54,14 @@ fn transform_code(code: &String, dg_directive: &str) -> Vec<String> {
     new_code
 }
 
-#[test]
-fn test_transform_code() {
-    let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" }";
-    let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
-    assert_eq!(
-        transform_code(&rust_msg.to_string(), DG_ERROR),
-        vec![dg_msg.to_string()]
-    );
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_transform_code() {
+        let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" }";
+        let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
+        assert_eq!(transform_code(rust_msg, RUSTTEST_ERROR), vec![dg_msg]);
+    }
 }
