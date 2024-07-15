@@ -1,12 +1,8 @@
+mod cli;
+
 use anyhow::Result;
 use clap::Parser;
-use std::{fs, path, process};
-
-#[derive(Parser)]
-struct Cli {
-    #[arg(short = 'f', long = "file")]
-    file: path::PathBuf,
-}
+use std::fs;
 
 const RUSTTEST_ERROR: &str = "//~^ ERROR ";
 const DG_ERROR: &str = "// { dg-error \"";
@@ -16,19 +12,19 @@ fn main() -> Result<()> {
 }
 
 fn try_parse() -> Result<()> {
-    let args = Cli::parse();
+    let args = cli::Arguments::parse();
 
-    if !args.file.exists() {
+    if !args.source_file.exists() {
         // TODO: return a proper error type about how the file wasn't found/doesn't exist
-        panic!("File {:?} not found", args.file);
+        panic!("File {:?} not found", args.source_file);
     }
 
-    let code = fs::read_to_string(&args.file)?;
+    let code = fs::read_to_string(&args.source_file)?;
 
     let new_code = transform_code(&code, RUSTTEST_ERROR);
 
-    fs::remove_file(&args.file)?;
-    fs::write(&args.file, new_code.join("\n"))?;
+    fs::remove_file(&args.source_file)?;
+    fs::write(&args.source_file, new_code.join("\n"))?;
 
     Ok(())
 }
