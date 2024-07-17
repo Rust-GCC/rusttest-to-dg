@@ -1,6 +1,6 @@
 mod cli;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::Parser;
 use std::fs;
 
@@ -14,12 +14,8 @@ fn main() -> Result<()> {
 fn try_parse() -> Result<()> {
     let args = cli::Arguments::parse();
 
-    if !args.source_file.exists() {
-        // TODO: return a proper error type about how the file wasn't found/doesn't exist
-        panic!("File {:?} not found", args.source_file);
-    }
-
-    let code = fs::read_to_string(&args.source_file)?;
+    let code = fs::read_to_string(&args.source_file)
+        .with_context(|| format!("could not read file `{}`", args.source_file.display()))?;
 
     let new_code = transform_code(&code, RUSTTEST_ERROR);
 
