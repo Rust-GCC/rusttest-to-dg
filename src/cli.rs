@@ -1,5 +1,7 @@
+use std::{fs, path};
+
+use anyhow::{Context, Result};
 use clap::Parser;
-use std::path;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -23,6 +25,36 @@ pub struct Arguments {
         required = false
     )]
     pub stderr_file: Option<path::PathBuf>,
+}
+
+pub fn parse_arguments_and_read_file(args: &Arguments) -> Result<(String, Option<String>)> {
+    //TODO: maybe to use sanitization to prevent reading files outside the project directory
+    let source_code = fs::read_to_string(&args.source_file)
+        .with_context(|| format!("could not read sourcefile `{}`", args.source_file.display()))?;
+
+    let err_file =
+        match &args.stderr_file {
+            Some(stderr_file) => Some(fs::read_to_string(stderr_file).with_context(|| {
+                format!("could not read stderr file `{}`", stderr_file.display())
+            })?),
+            None => None,
+        };
+
+    Ok((source_code, err_file))
+}
+
+pub fn update_source_code(args: &Arguments, new_code: String) -> Result<()> {
+    fs::remove_file(&args.source_file)
+        .with_context(|| format!("could not remove file `{}`", &args.source_file.display()))?;
+
+    fs::write(&args.source_file, new_code).with_context(|| {
+        format!(
+            "could not write updated code to file `{}`",
+            &args.source_file.display()
+        )
+    })?;
+
+    Ok(())
 }
 
 #[cfg(test)]

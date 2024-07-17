@@ -1,12 +1,8 @@
-mod cli;
-mod transform;
-
 use anyhow::{Context, Result};
 use clap::Parser;
-use std::fs;
 
-const RUSTTEST_ERROR: &str = "//~^ ERROR ";
-const DG_ERROR: &str = "// { dg-error \"";
+mod cli;
+mod transform;
 
 fn main() -> Result<()> {
     try_parse()
@@ -15,8 +11,7 @@ fn main() -> Result<()> {
 fn try_parse() -> Result<()> {
     let args = cli::Arguments::parse();
 
-    let code = fs::read_to_string(&args.source_file)
-        .with_context(|| format!("could not read file `{}`", args.source_file.display()))?;
+    let (code, _stderr_code) = cli::parse_arguments_and_read_file(&args)?;
 
     let new_code = transform::transform_code(&code).with_context(|| {
         format!(
@@ -25,8 +20,7 @@ fn try_parse() -> Result<()> {
         )
     })?;
 
-    fs::remove_file(&args.source_file)?;
-    fs::write(&args.source_file, new_code.join("\n"))?;
+    cli::update_source_code(&args, new_code)?;
 
     Ok(())
 }

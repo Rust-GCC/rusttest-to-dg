@@ -1,8 +1,8 @@
 use anyhow::Result;
 
 // TODO: Add more directive relative to rustc and DejaGnu
-pub const RUSTTEST_ERROR: &'static str = "//~^ ERROR ";
-pub const DG_ERROR: &'static str = "// { dg-error \"";
+pub const RUSTTEST_ERROR: &str = "//~^ ERROR ";
+pub const DG_ERROR: &str = "// { dg-error \"";
 
 /// This function takes the rust code and rust directive
 /// and returns the code with DejaGnu directive
