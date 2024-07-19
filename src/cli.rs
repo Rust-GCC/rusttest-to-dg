@@ -43,18 +43,8 @@ pub fn parse_arguments_and_read_file(args: &Arguments) -> Result<(String, Option
     Ok((source_code, err_file))
 }
 
-pub fn update_source_code(args: &Arguments, new_code: String) -> Result<()> {
-    fs::remove_file(&args.source_file)
-        .with_context(|| format!("could not remove file `{}`", &args.source_file.display()))?;
-
-    fs::write(&args.source_file, new_code).with_context(|| {
-        format!(
-            "could not write updated code to file `{}`",
-            &args.source_file.display()
-        )
-    })?;
-
-    Ok(())
+pub fn print_source_code(source_code: &String) {
+    println!("{source_code}");
 }
 
 #[cfg(test)]
