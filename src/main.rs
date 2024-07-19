@@ -20,7 +20,7 @@ fn try_parse() -> Result<()> {
         )
     })?;
 
-    cli::update_source_code(&args, new_code)?;
+    cli::print_source_code(&new_code);
 
     Ok(())
 }
