@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use clap::Parser;
 
 mod cli;
+mod errors;
 mod transform;
 
 fn main() -> Result<()> {
