@@ -183,7 +183,7 @@ fn parse_expected(
             line_num,
             kind,
             msg,
-            error_code: "E0000".to_owned().into(),
+            error_code: None,
             relative_line_num,
         },
     ))

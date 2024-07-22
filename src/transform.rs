@@ -3,11 +3,7 @@ use anyhow::Result;
 use regex::Regex;
 use std::sync::OnceLock;
 
-// TODO: Add more directive relative to rustc and DejaGnu
-pub const RUSTTEST_ERROR: &str = "//~^ ERROR ";
-pub const DG_ERROR: &str = "// { dg-error \"";
-
-/// This function takes the rust code and rust directive
+/// This function takes the rust code as input
 /// and returns the code with DejaGnu directive
 pub fn transform_code(code: &str) -> Result<String> {
     let errors = errors::load_error(code);
@@ -25,7 +21,7 @@ pub fn transform_code(code: &str) -> Result<String> {
             // on the same line or the next line not on the previous line
             // For the error on the next line
             if error.relative_line_num != 0 {
-                new_line = format!("\t{}", error);
+                new_line = format!("{}", error);
             } else {
                 // For the error on the same line
                 static RE: OnceLock<Regex> = OnceLock::new();
@@ -45,17 +41,11 @@ pub fn transform_code(code: &str) -> Result<String> {
             break;
         }
         new_code.push_str(&new_line);
-        new_code.push_str("\n");
+        new_code.push('\n');
         line_num += 1;
     }
 
     Ok(new_code)
-}
-
-fn transform_line(line: &str, rust_directive: &str, dejagnu_directive: &str) -> String {
-    let new_line = line.replace(rust_directive, dejagnu_directive);
-    // format the line according to DejaGnu format
-    format!("{}\" }}", new_line)
 }
 
 #[cfg(test)]
@@ -64,15 +54,8 @@ mod tests {
 
     #[test]
     fn test_transform() {
-        let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" }";
+        let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)` \" \"\" { target *-*-* } .-1 }\n";
         let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
         assert_eq!(transform_code(rust_msg).unwrap(), dg_msg);
-    }
-
-    #[test]
-    fn test_transform_line() {
-        let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" }";
-        let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
-        assert_eq!(transform_line(rust_msg, RUSTTEST_ERROR, DG_ERROR), dg_msg);
     }
 }
