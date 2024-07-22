@@ -69,7 +69,7 @@ impl fmt::Display for Error {
         let error_code = self.error_code.as_ref().map_or("", |code| &code[..]);
         write!(
             f,
-            "// {{ {} \"{} {}\" \"\" {{ target *-*-* }} {}}}",
+            "// {{ {} \"{}{}\" \"\" {{ target *-*-* }} {}}}",
             match &self.kind {
                 Some(kind) => match kind {
                     RustcErrorKind::Help => "help",
@@ -82,7 +82,7 @@ impl fmt::Display for Error {
             },
             self.msg,
             if !error_code.is_empty() {
-                format!(".{}.", error_code)
+                format!(" .{}.", error_code)
             } else {
                 error_code.to_owned()
             },
