@@ -1,3 +1,8 @@
+use std::{fmt, str::FromStr, sync::OnceLock};
+
+use regex::Regex;
+
+use self::WhichLine::*;
 
 // https://rustc-dev-guide.rust-lang.org/tests/ui.html#error-levels
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -57,6 +62,36 @@ pub struct Error {
     pub kind: Option<RustcErrorKind>,
     pub msg: String,
     pub error_code: Option<String>,
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let error_code = self.error_code.as_ref().map_or("", |code| &code[..]);
+        let relative_line_num = format!(".{}", self.relative_line_num);
+        write!(
+            f,
+            "// {{ {} \"{} {}\" \"\" {{ target *-*-* }} {} }}",
+            match &self.kind {
+                Some(kind) => match kind {
+                    RustcErrorKind::Help => "help",
+                    RustcErrorKind::Error => "dg-error",
+                    RustcErrorKind::Note => "dg-note",
+                    RustcErrorKind::Suggestion => "suggestion",
+                    RustcErrorKind::Warning => "dg-warning",
+                },
+                None => "dg-error",
+            },
+            self.msg,
+            if !error_code.is_empty() {
+                format!(".{}.", error_code)
+            } else {
+                error_code.to_owned()
+            },
+            relative_line_num
+        )
+    }
+}
+
 #[derive(PartialEq, Debug)]
 enum WhichLine {
     ThisLine,
