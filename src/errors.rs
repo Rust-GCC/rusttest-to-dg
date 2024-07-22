@@ -115,31 +115,67 @@ pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
             errors.push(error);
         }
     }
-    if stderr_file.is_some() {
-        for error in &mut errors {
-            if let Some(error_code) = parse_error_code(stderr_file.unwrap()) {
-                error.error_code = Some(error_code);
+
+    if stderr_file.is_none() {
+        return errors;
+    }
+    // TODO: improve this code incrementally
+    let error_code_stderr = parse_error_code(stderr_file.unwrap());
+
+    for error in errors.iter_mut() {
+        for error_code in error_code_stderr.iter() {
+            if error.line_num == error_code.line_number
+                && error.msg == error_code.error_message_detail
+            {
+                error.error_code = Some(error_code.error_code.clone());
             }
         }
     }
-
     errors
 }
 
-fn parse_error_code(stderr_content: &str) -> Option<String> {
+#[derive(Debug)]
+struct StderrResult {
+    error_code: String,
+    error_message_detail: String,
+    line_number: usize,
+}
+
+fn is_error_code(s: &str) -> bool {
+    let re = Regex::new(r"^E\d{4}$").unwrap();
+    re.is_match(s)
+}
+
+fn parse_error_code(stderr_content: &str) -> Vec<StderrResult> {
     // TODO: This will check for only one error code in the stderr file, add support for multiple error codes
-    static RE: OnceLock<Regex> = OnceLock::new();
+    // Modified regex pattern with named capture groups
+    let error_pattern = Regex::new(r"error\[(?P<error_code>E\d+)\]: (?P<error_message_detail>.+?)\n\s+-->.+:(?P<line_number>\d+):").unwrap();
+    let mut results = Vec::new();
 
-    let captures = RE
-        .get_or_init(|| Regex::new(r"error\[(?P<error_code>E\d{4})]").unwrap())
-        .captures(stderr_content)?;
+    for caps in error_pattern.captures_iter(stderr_content) {
+        let error_code = caps.name("error_code").map_or_else(
+            || "Error code not found".to_string(),
+            |m| m.as_str().to_string(),
+        );
+        let error_message_detail = caps.name("error_message_detail").map_or_else(
+            || "Error message detail not found".to_string(),
+            |m| m.as_str().to_string(),
+        );
+        let line_number = caps.name("line_number").map_or_else(
+            || "Line number not found".to_string(),
+            |m| m.as_str().to_string(),
+        );
+        if !is_error_code(&error_code) {
+            continue;
+        }
+        results.push(StderrResult {
+            error_code,
+            error_message_detail,
+            line_number: line_number.parse::<usize>().unwrap(),
+        });
+    }
 
-    // Get the part of the error message after `error[EXXXX]: `
-    // extract error code from stderr
-    // extract "E0576" from "error[E0576]:"
-    let error_code_match = captures.get(1).unwrap();
-    let (_, error_code) = error_code_match.as_str().split_at(0);
-    Some(error_code.trim().to_owned())
+    results
 }
 
 fn parse_expected(
