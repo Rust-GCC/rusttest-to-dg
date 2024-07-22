@@ -102,7 +102,7 @@ enum WhichLine {
     AdjustBackward(usize),
 }
 
-pub fn load_error(text_file: &str) -> Vec<Error> {
+pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
     let mut last_unfollow_error = None;
     let mut errors = Vec::new();
 
@@ -115,8 +115,31 @@ pub fn load_error(text_file: &str) -> Vec<Error> {
             errors.push(error);
         }
     }
+    if stderr_file.is_some() {
+        for error in &mut errors {
+            if let Some(error_code) = parse_error_code(stderr_file.unwrap()) {
+                error.error_code = Some(error_code);
+            }
+        }
+    }
 
     errors
+}
+
+fn parse_error_code(stderr_content: &str) -> Option<String> {
+    // TODO: This will check for only one error code in the stderr file, add support for multiple error codes
+    static RE: OnceLock<Regex> = OnceLock::new();
+
+    let captures = RE
+        .get_or_init(|| Regex::new(r"error\[(?P<error_code>E\d{4})]").unwrap())
+        .captures(stderr_content)?;
+
+    // Get the part of the error message after `error[EXXXX]: `
+    // extract error code from stderr
+    // extract "E0576" from "error[E0576]:"
+    let error_code_match = captures.get(1).unwrap();
+    let (_, error_code) = error_code_match.as_str().split_at(0);
+    Some(error_code.trim().to_owned())
 }
 
 fn parse_expected(

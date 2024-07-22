@@ -1,12 +1,14 @@
-use crate::errors;
+use std::sync::OnceLock;
+
 use anyhow::Result;
 use regex::Regex;
-use std::sync::OnceLock;
+
+use crate::errors;
 
 /// This function takes the rust code as input
 /// and returns the code with DejaGnu directive
-pub fn transform_code(code: &str) -> Result<String> {
-    let errors = errors::load_error(code);
+pub fn transform_code(code: &str, stderr_file: Option<&str>) -> Result<String> {
+    let errors = errors::load_error(code, stderr_file);
     let mut new_code = String::new();
 
     let mut line_num = 1;
@@ -56,6 +58,6 @@ mod tests {
     fn test_transform() {
         let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" \"\" { target *-*-* } .-1 }\n";
         let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
-        assert_eq!(transform_code(rust_msg).unwrap(), dg_msg);
+        assert_eq!(transform_code(rust_msg, None).unwrap(), dg_msg);
     }
 }
