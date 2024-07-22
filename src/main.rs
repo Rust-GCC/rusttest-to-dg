@@ -12,9 +12,9 @@ fn main() -> Result<()> {
 fn try_parse() -> Result<()> {
     let args = cli::Arguments::parse();
 
-    let (code, _stderr_code) = cli::parse_arguments_and_read_file(&args)?;
+    let (code, stderr_code) = cli::parse_arguments_and_read_file(&args)?;
 
-    let new_code = transform::transform_code(&code).with_context(|| {
+    let new_code = transform::transform_code(&code, stderr_code.as_deref()).with_context(|| {
         format!(
             "could not transform code from file `{}`",
             args.source_file.display()
