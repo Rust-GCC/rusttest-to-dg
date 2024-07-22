@@ -67,10 +67,9 @@ pub struct Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let error_code = self.error_code.as_ref().map_or("", |code| &code[..]);
-        let relative_line_num = format!(".{}", self.relative_line_num);
         write!(
             f,
-            "// {{ {} \"{} {}\" \"\" {{ target *-*-* }} {} }}",
+            "// {{ {} \"{} {}\" \"\" {{ target *-*-* }} {}}}",
             match &self.kind {
                 Some(kind) => match kind {
                     RustcErrorKind::Help => "help",
@@ -87,7 +86,11 @@ impl fmt::Display for Error {
             } else {
                 error_code.to_owned()
             },
-            relative_line_num
+            if self.relative_line_num == 0 {
+                "".to_owned()
+            } else {
+                format!(".{} ", self.relative_line_num)
+            },
         )
     }
 }
