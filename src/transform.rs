@@ -56,7 +56,8 @@ mod tests {
 
     #[test]
     fn test_transform() {
-        let dg_msg = "// { dg-error \"expected one of `:`, `@`, or `|`, found `)`\" \"\" { target *-*-* } .-1 }\n";
+        // as suggested by @CohenArthur, we only need to add error code in msg
+        let dg_msg = "// { dg-error \"\" \"\" { target *-*-* } .-1 }\n";
         let rust_msg = "//~^ ERROR expected one of `:`, `@`, or `|`, found `)`";
         assert_eq!(transform_code(rust_msg, None).unwrap(), dg_msg);
     }
