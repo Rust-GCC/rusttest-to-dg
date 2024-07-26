@@ -1,4 +1,4 @@
-use std::{fmt, str::FromStr, sync::OnceLock};
+use std::{cell::OnceCell, fmt, str::FromStr};
 
 use regex::Regex;
 
@@ -167,14 +167,19 @@ struct StderrResult {
 }
 
 fn is_error_code(s: &str) -> bool {
-    let re = Regex::new(r"^E\d{4}$").unwrap();
-    re.is_match(s)
+    let re: OnceCell<Regex> = OnceCell::new();
+    let regex = re.get_or_init(|| Regex::new(r"^E\d{4}$").unwrap());
+    regex.is_match(s)
 }
 
 fn parse_error_code(stderr_content: &str) -> Vec<StderrResult> {
     // TODO: This will check for only one error code in the stderr file, add support for multiple error codes
     // Modified regex pattern with named capture groups
-    let error_pattern = Regex::new(r"error\[(?P<error_code>E\d+)\]: (?P<error_message_detail>.+?)\n\s+-->.+:(?P<line_number>\d+):").unwrap();
+    let re: OnceCell<Regex> = OnceCell::new();
+    let error_pattern = re.get_or_init(|| {
+        Regex::new(r"error\[(?P<error_code>E\d{4})\]: (?P<error_message_detail>.+?)\n\s+-->.+:(?P<line_number>\d+):").unwrap()
+    });
+
     let mut results = Vec::new();
 
     for caps in error_pattern.captures_iter(stderr_content) {
@@ -213,9 +218,9 @@ fn parse_expected(
     //     //~|
     //     //~^
     //     //~^^^^^
-    static RE: OnceLock<Regex> = OnceLock::new();
+    let re: OnceCell<Regex> = OnceCell::new();
 
-    let captures = RE
+    let captures = re
         .get_or_init(|| Regex::new(r"//(?:\[(?P<revs>[\w\-,]+)])?~(?P<adjust>\||\^*)").unwrap())
         .captures(line)?;
 

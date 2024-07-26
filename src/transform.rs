@@ -1,4 +1,4 @@
-use std::sync::OnceLock;
+use std::cell::OnceCell;
 
 use anyhow::Result;
 use regex::Regex;
@@ -26,9 +26,9 @@ pub fn transform_code(code: &str, stderr_file: Option<&str>) -> Result<String> {
                 new_line = format!("{}", error);
             } else {
                 // For the error on the same line
-                static RE: OnceLock<Regex> = OnceLock::new();
+                let re: OnceCell<Regex> = OnceCell::new();
 
-                let captures = RE
+                let captures = re
                     .get_or_init(|| {
                         Regex::new(r"//(?:\[(?P<revs>[\w\-,]+)])?~(?P<adjust>\||\^*)").unwrap()
                     })
