@@ -123,7 +123,7 @@ pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
         return errors;
     }
     // TODO: improve this code incrementally
-    let error_code_stderr = parse_error_code(stderr_file.unwrap());
+    let error_code_stderr = parse_error_code(stderr_file.expect("stderr file is not found"));
 
     for error in errors.iter_mut() {
         for error_code in error_code_stderr.iter() {
@@ -178,7 +178,9 @@ fn parse_error_code(stderr_content: &str) -> Vec<StderrResult> {
         results.push(StderrResult {
             error_code,
             error_message_detail,
-            line_number: line_number.parse::<usize>().unwrap(),
+            line_number: line_number
+                .parse::<usize>()
+                .expect("expected line number to be a valid number"),
         });
     }
 
@@ -207,7 +209,9 @@ fn parse_expected(
     };
 
     // Get the part of the comment after the sigil (e.g. `~^^` or ~|).
-    let whole_match = captures.get(0).unwrap();
+    let whole_match = captures
+        .get(0)
+        .expect("Failed to parse comments like \"//~\" \"//~^\" \"//~^^^^^\" ");
     let (_, mut msg) = line.split_at(whole_match.end());
 
     let first_word = msg
