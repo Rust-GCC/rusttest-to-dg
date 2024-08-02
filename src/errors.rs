@@ -66,30 +66,34 @@ pub struct Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use RustcErrorKind::*;
+
         let error_code = self.error_code.as_ref().map_or("", |code| &code[..]);
+
+        let error_type = match &self.kind {
+            Some(Help) => "help",
+            Some(Error) => "dg-error",
+            Some(Note) => "dg-note",
+            Some(Suggestion) => "suggestion",
+            Some(Warning) => "dg-warning",
+            None => "dg-error",
+        };
+
+        let error_code = if error_code.is_empty() {
+            error_code.to_owned()
+        } else {
+            format!(".{}.", error_code)
+        };
+
+        let rel_line_number = if self.relative_line_num == 0 {
+            "".to_owned()
+        } else {
+            format!(".{} ", self.relative_line_num)
+        };
+
         write!(
             f,
-            "// {{ {} \"{}\" \"\" {{ target *-*-* }} {}}}",
-            match &self.kind {
-                Some(kind) => match kind {
-                    RustcErrorKind::Help => "help",
-                    RustcErrorKind::Error => "dg-error",
-                    RustcErrorKind::Note => "dg-note",
-                    RustcErrorKind::Suggestion => "suggestion",
-                    RustcErrorKind::Warning => "dg-warning",
-                },
-                None => "dg-error",
-            },
-            if !error_code.is_empty() {
-                format!(".{}.", error_code)
-            } else {
-                error_code.to_owned()
-            },
-            if self.relative_line_num == 0 {
-                "".to_owned()
-            } else {
-                format!(".{} ", self.relative_line_num)
-            },
+            "// {{ {error_type} \"{error_code}\" \"\" {{ target *-*-* }} {rel_line_number}}}"
         )
     }
 }
