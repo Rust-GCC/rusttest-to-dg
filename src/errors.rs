@@ -52,9 +52,9 @@ impl fmt::Display for RustcErrorKind {
 pub struct Error {
     pub line_num: usize,
     /// We also need to take into account the relative line number.
-    /// if the error is on the previous line, then it's value is `1`.
-    /// if the error is on the same line, then it's value is `0`.
-    /// if the error is on the next line, then it's value is `-1`.
+    /// - `1` if the error is on the previous line
+    /// - `0` if the error is on the same line
+    /// - `-1` if the error is on the next line
     pub relative_line_num: i32,
 
     /// What kind of message we expect (e.g., warning, error, suggestion).
