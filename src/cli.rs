@@ -43,7 +43,7 @@ pub fn parse_arguments_and_read_file(args: &Arguments) -> Result<(String, Option
     Ok((source_code, err_file))
 }
 
-pub fn print_source_code(source_code: &String) {
+pub fn print_source_code(source_code: &str) {
     println!("{source_code}");
 }
 
