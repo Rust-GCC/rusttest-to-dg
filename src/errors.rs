@@ -135,7 +135,7 @@ pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
     for error in errors.iter_mut() {
         for error_code in error_code_stderr.iter() {
             if error.line_num == error_code.line_number
-                && error.msg == error_code.error_message_detail
+                || error.msg == error_code.error_message_detail
             {
                 error.error_code = Some(error_code.error_code.clone());
             }
