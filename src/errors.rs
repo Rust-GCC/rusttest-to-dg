@@ -1,3 +1,5 @@
+//! This module contains the logic for parsing rustc error messages.
+
 use {
     self::WhichLine::*,
     std::{fmt, str::FromStr},
@@ -11,7 +13,9 @@ macro_rules! regex {
         RE.get_or_init(|| regex::Regex::new($re).unwrap())
     }};
 }
-// https://rustc-dev-guide.rust-lang.org/tests/ui.html#error-levels
+
+/// Represents the different kinds of Rustc compiler messages.
+/// See [rustc dev guide](https://rustc-dev-guide.rust-lang.org/tests/ui.html#error-levels)
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RustcErrorKind {
     Help,
@@ -55,6 +59,7 @@ impl fmt::Display for RustcErrorKind {
     }
 }
 
+/// To store information from rustc source file
 #[derive(Debug)]
 pub struct Error {
     pub line_num: usize,
@@ -67,11 +72,14 @@ pub struct Error {
     /// What kind of message we expect (e.g., warning, error, suggestion).
     /// `None` if not specified or unknown message kind.
     pub kind: Option<RustcErrorKind>,
+    ///Note: if we are loading this from rustc source file, this might be incomplete
     pub msg: String,
     pub error_code: Option<String>,
 }
 
 impl fmt::Display for Error {
+    /// Formats the `Error` for display according to `DejaGnu` format
+    /// See `DejaGnu` documentation [here](https://gcc.gnu.org/onlinedocs/gccint/testsuites/directives-used-within-dejagnu-tests/syntax-and-descriptions-of-test-directives.html)
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use RustcErrorKind::*;
 
@@ -105,6 +113,9 @@ impl fmt::Display for Error {
     }
 }
 
+/// Represents the line in the rustc source code where an error occurred.
+/// Luckily, rust compile test only stores error messages on and after the line where the error occurred.
+/// But `DejaGnu` can process error messages on the previous line, the current line, or the next line.
 #[derive(PartialEq, Debug)]
 enum WhichLine {
     ThisLine,
@@ -112,8 +123,10 @@ enum WhichLine {
     AdjustBackward(usize),
 }
 
+/// The main function for loading errors from source file and from optional stderr file.
 pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
     let mut last_unfollow_error = None;
+    // For storing the errors
     let mut errors = Vec::new();
 
     for (line_num, line) in text_file.lines().enumerate() {
@@ -126,12 +139,17 @@ pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
         }
     }
 
+    // If stderr file is not provided, return the errors
     if stderr_file.is_none() {
         return errors;
     }
     // TODO: improve this code incrementally
+    // parsing error related information from `.stderr` file
     let error_code_stderr = parse_error_code(stderr_file.expect("stderr file is not found"));
 
+    // TODO: We need to load error messages from `.stderr` instead of source file become sometimes source file contains incomplete error messages
+    // finding the error code w.r.t line number and error message
+    // TODO: sometimes, the error message might not be same but this doesn't matter as we are not comparing the row number for the message
     for error in errors.iter_mut() {
         for error_code in error_code_stderr.iter() {
             if error.line_num == error_code.line_number
@@ -141,9 +159,11 @@ pub fn load_error(text_file: &str, stderr_file: Option<&str>) -> Vec<Error> {
             }
         }
     }
+    // return error detail with error codes
     errors
 }
 
+/// To represent information from `stderr` file
 #[derive(Debug)]
 struct StderrResult {
     error_code: String,
@@ -155,6 +175,7 @@ fn is_error_code(s: &str) -> bool {
     regex!(r"^E\d{4}$").is_match(s)
 }
 
+/// Parses error codes from the `stderr` file
 fn parse_error_code(stderr_content: &str) -> Vec<StderrResult> {
     // Modified regex pattern with named capture groups
     let error_pattern = regex!(
@@ -191,6 +212,7 @@ fn parse_error_code(stderr_content: &str) -> Vec<StderrResult> {
     results
 }
 
+/// Parses error details from a source line.
 fn parse_expected(
     last_nonfollow_error: Option<usize>,
     line_num: usize,
@@ -228,6 +250,7 @@ fn parse_expected(
 
     let msg = msg.trim().to_owned();
 
+    // If we find `//~|` or `//~^`, we need to adjust the line number.
     let mut relative_line_num = line_num as i32;
     let (which, line_num) = if follow {
         assert_eq!(adjusts, 0, "use either //~| or //~^, not both.");
