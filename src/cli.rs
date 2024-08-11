@@ -1,7 +1,8 @@
-use std::{fs, path};
-
-use anyhow::{Context, Result};
-use clap::Parser;
+use {
+    anyhow::{Context, Result},
+    clap::Parser,
+    std::{fs, path},
+};
 
 #[derive(Parser, Debug)]
 #[command(
