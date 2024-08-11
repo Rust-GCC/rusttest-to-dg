@@ -1,9 +1,7 @@
-use std::cell::OnceCell;
-
-use anyhow::Result;
-use regex::Regex;
-
-use crate::errors;
+use {
+    crate::{errors, regex},
+    anyhow::Result,
+};
 
 /// This function takes the rust code as input
 /// and returns the code with DejaGnu directive
@@ -26,12 +24,7 @@ pub fn transform_code(code: &str, stderr_file: Option<&str>) -> Result<String> {
                 new_line = format!("{}", error);
             } else {
                 // For the error on the same line
-                let re: OnceCell<Regex> = OnceCell::new();
-
-                let captures = re
-                    .get_or_init(|| {
-                        Regex::new(r"//(?:\[(?P<revs>[\w\-,]+)])?~(?P<adjust>\||\^*)").unwrap()
-                    })
+                let captures = regex!(r"//(?:\[(?P<revs>[\w\-,]+)])?~(?P<adjust>\||\^*)")
                     .captures(line)
                     .expect("Could not find the error directive");
 
