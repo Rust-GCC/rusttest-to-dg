@@ -1,8 +1,7 @@
-use std::{cell::OnceCell, fmt, str::FromStr};
-
-use regex::Regex;
-
-use self::WhichLine::*;
+use {
+    self::WhichLine::*,
+    std::{fmt, str::FromStr},
+};
 
 // https://docs.rs/once_cell/1.19.0/once_cell/#lazily-compiled-regex
 #[macro_export]
@@ -153,17 +152,14 @@ struct StderrResult {
 }
 
 fn is_error_code(s: &str) -> bool {
-    let re: OnceCell<Regex> = OnceCell::new();
-    let regex = re.get_or_init(|| Regex::new(r"^E\d{4}$").unwrap());
-    regex.is_match(s)
+    regex!(r"^E\d{4}$").is_match(s)
 }
 
 fn parse_error_code(stderr_content: &str) -> Vec<StderrResult> {
     // Modified regex pattern with named capture groups
-    let re: OnceCell<Regex> = OnceCell::new();
-    let error_pattern = re.get_or_init(|| {
-        Regex::new(r"error\[(?P<error_code>E\d{4})\]: (?P<error_message_detail>.+?)\n\s+-->.+:(?P<line_number>\d+):").unwrap()
-    });
+    let error_pattern = regex!(
+        r"error\[(?P<error_code>E\d{4})\]: (?P<error_message_detail>.+?)\n\s+-->.+:(?P<line_number>\d+):"
+    );
 
     let mut results = Vec::new();
 
@@ -205,11 +201,8 @@ fn parse_expected(
     //     //~|
     //     //~^
     //     //~^^^^^
-    let re: OnceCell<Regex> = OnceCell::new();
 
-    let captures = re
-        .get_or_init(|| Regex::new(r"//(?:\[(?P<revs>[\w\-,]+)])?~(?P<adjust>\||\^*)").unwrap())
-        .captures(line)?;
+    let captures = regex!(r"//(?:\[(?P<revs>[\w\-,]+)])?~(?P<adjust>\||\^*)").captures(line)?;
 
     let (follow, adjusts) = match &captures["adjust"] {
         "|" => (true, 0),
