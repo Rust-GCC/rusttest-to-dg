@@ -1,5 +1,7 @@
-use anyhow::{Context, Result};
-use clap::Parser;
+use {
+    anyhow::{Context, Result},
+    clap::Parser,
+};
 
 mod cli;
 mod errors;
