@@ -11,6 +11,20 @@ pub struct HeaderLine<'ln> {
     pub dejagnu_header: String,
 }
 
+pub fn parse_additional_options(code: &str) -> Vec<HeaderLine> {
+    let mut headers = Vec::new();
+
+    for (line_number, line) in code.lines().enumerate() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with("fn") || line.starts_with("mod") {
+            continue;
+        }
+        if line.trim_start().starts_with("//@") {
+            headers.push(add_additional_options(line, line_number).unwrap());
+        }
+    }
+    headers
+}
 
 fn add_additional_options(code: &str, line_number: usize) -> Option<HeaderLine> {
     //TODO: If we know the file extension, then update this to
