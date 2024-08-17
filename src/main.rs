@@ -7,6 +7,7 @@ use {
 
 mod cli;
 mod errors;
+mod header;
 mod transform;
 
 fn main() -> Result<()> {
