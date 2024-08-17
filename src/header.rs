@@ -11,6 +11,29 @@ pub struct HeaderLine<'ln> {
     pub dejagnu_header: String,
 }
 
+
+fn line_directive<'line>(
+    comment: &str,
+    original_line: &'line str,
+) -> Option<(Option<&'line str>, &'line str)> {
+    let after_comment = original_line
+        .trim_start()
+        .strip_prefix(comment)?
+        .trim_start();
+
+    if let Some(after_open_bracket) = after_comment.strip_prefix('[') {
+        let Some((line_revision, directive)) = after_open_bracket.split_once(']') else {
+            panic!(
+                "malformed condition directive: expected `{comment}[foo]`, found `{original_line}`"
+            )
+        };
+
+        Some((Some(line_revision), directive.trim_start()))
+    } else {
+        Some((None, after_comment))
+    }
+}
+
 fn parse_edition(line: &str) -> Option<String> {
     parse_name_value_directive(line, "edition")
 }
