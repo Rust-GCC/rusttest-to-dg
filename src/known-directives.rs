@@ -1,6 +1,5 @@
 // Copied from https://github.com/rust-lang/rust/blob/master/src/tools/compiletest/src/command-list.rs
 pub const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
-    // tidy-alphabetical-start
     "assembly-output",
     "aux-bin",
     "aux-build",
@@ -230,7 +229,5 @@ pub const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "unique-doc-out-dir",
     "unset-exec-env",
     "unset-rustc-env",
-    // Used by the tidy check `unknown_revision`.
     "unused-revision-names",
-    // tidy-alphabetical-end
 ];
