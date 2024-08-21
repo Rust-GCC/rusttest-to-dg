@@ -1,7 +1,11 @@
 //! This module contains the code transformation logic.
 
 use {
-    crate::{errors, header::parse_additional_options, regex},
+    crate::{
+        errors,
+        header::{is_header_line, parse_additional_options},
+        regex,
+    },
     anyhow::Result,
 };
 
@@ -18,7 +22,7 @@ pub fn transform_code(code: &str, stderr_file: Option<&str>) -> Result<String> {
     for line in code.lines() {
         let mut new_line = line.to_string();
 
-        if line.trim_start().starts_with("//@") {
+        if is_header_line(line) {
             for header in additional_options.iter() {
                 if header.line_number != line_num {
                     continue;

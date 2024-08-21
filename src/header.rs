@@ -19,11 +19,15 @@ pub fn parse_additional_options(code: &str) -> Vec<HeaderLine> {
         if line.is_empty() || line.starts_with("fn") || line.starts_with("mod") {
             continue;
         }
-        if line.trim_start().starts_with("//@") {
+        if is_header_line(line) {
             headers.push(add_additional_options(line, line_number).unwrap());
         }
     }
     headers
+}
+
+pub fn is_header_line(line: &str) -> bool {
+    line.trim_start().starts_with("//@")
 }
 
 fn add_additional_options(code: &str, line_number: usize) -> Option<HeaderLine> {
