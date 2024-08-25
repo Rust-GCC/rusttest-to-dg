@@ -1,8 +1,13 @@
-use anyhow::{Context, Result};
-use clap::Parser;
+//! The main entry point of the program.
+
+use {
+    anyhow::{Context, Result},
+    clap::Parser,
+};
 
 mod cli;
 mod errors;
+mod header;
 mod transform;
 
 fn main() -> Result<()> {
