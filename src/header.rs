@@ -20,7 +20,9 @@ pub fn parse_additional_options(code: &str) -> Vec<HeaderLine> {
             continue;
         }
         if is_header_line(line) {
-            headers.push(add_additional_options(line, line_number).unwrap());
+            if let Some(header_info) = add_additional_options(line, line_number) {
+                headers.push(header_info);
+            }
         }
     }
     headers
