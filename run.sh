@@ -62,6 +62,7 @@ process_files() {
             else
                 rusttest-to-dg --file "$file" > "$output_file"
             fi
+            mv $output_file $file
         fi
     done
 
@@ -80,11 +81,5 @@ process_files "$GCCRS_PATH/gcc/testsuite/rust/rustc/ui/"
 echo "Removing non-.rs files in $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
 find "$GCCRS_PATH/gcc/testsuite/rust/rustc/ui" -type f ! -name '*.rs' -exec rm -f {} +
 echo "Removed non-.rs files in $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
-
-echo "Renaming files that end with _dg.rs in $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
-find "$GCCRS_PATH/gcc/testsuite/rust/rustc/ui" -type f -name '*_dg.rs' | while read -r file; do
-  mv "$file" "${file/_dg.rs/.rs}"
-done
-echo "Renamed files that end with _dg.rs in $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
 
 echo -e "Processing complete."
