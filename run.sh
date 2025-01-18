@@ -58,9 +58,9 @@ process_files() {
 
             # if we have `.stderr` file
             if [[ -f "$stderr_file" ]]; then
-                rusttest-to-dg --file "$file" --stderr "$stderr_file" > "$output_file"
+                rusttest-to-dg "$file" --stderr "$stderr_file" > "$output_file"
             else
-                rusttest-to-dg --file "$file" > "$output_file"
+                rusttest-to-dg "$file" > "$output_file"
             fi
             mv "$output_file" "$file"
         fi

@@ -15,8 +15,7 @@ use {
 pub struct Arguments {
     /// The rust source file to convert into `DejaGnu` format
     #[arg(
-        short = 'f',
-        long = "file",
+        // positional argument
         value_name = "FILE",
         help = "The rust source file to convert into DejaGnu format"
     )]
