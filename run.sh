@@ -11,8 +11,8 @@ fi
 
 # if RUST_PATH is set
 if [ -z "$RUST_PATH" ]; then
-  echo "Error: GCCRS_PATH environment variable is not set."
-  echo -e "Please set it using the command:\n\texport GCCRS_PATH=/path/to/gccrs"
+  echo "Error: RUST_PATH environment variable is not set."
+  echo -e "Please set it using the command:\n\texport RUST_PATH=/path/to/rust"
   exit 1
 fi
 
