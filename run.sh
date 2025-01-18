@@ -28,7 +28,7 @@ echo "RUST_PATH: $RUST_PATH"
 echo "RUSTTEST_TO_DG_PATH: $RUSTTEST_TO_DG_PATH"
 
 # Installing rusttest-to-dg
-cd $RUSTTEST_TO_DG_PATH
+cd "$RUSTTEST_TO_DG_PATH"
 echo -e "\nInstalling rusttest-to-dg\n"
 cargo install --path .
 echo -e "\nInstalled rusttest-to-dg\n"
@@ -44,9 +44,9 @@ fi
 
 # Copying the RUST_PATH/tests/ui to GCCRS_PATH/gcc/testsuite/rust/rustc
 echo -e "Copying tests from $RUST_PATH/tests/ui to $GCCRS_PATH/gcc/testsuite/rust/rustc"
-cp -r $RUST_PATH/tests/ui $GCCRS_PATH/gcc/testsuite/rust/rustc
+cp -r "$RUST_PATH"/tests/ui "$GCCRS_PATH"/gcc/testsuite/rust/rustc
 echo -e "Copied $RUST_PATH/tests/ui tests to $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
-cd $GCCRS_PATH/gcc/testsuite/rust/rustc/ui
+cd "$GCCRS_PATH"/gcc/testsuite/rust/rustc/ui
 
 process_files() {
     # Recursively process rust files
@@ -62,7 +62,7 @@ process_files() {
             else
                 rusttest-to-dg --file "$file" > "$output_file"
             fi
-            mv $output_file $file
+            mv "$output_file" "$file"
         fi
     done
 
