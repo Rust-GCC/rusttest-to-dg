@@ -59,14 +59,14 @@ mod tests {
 
     #[test]
     fn test_required_argument_file() {
-        let args = Arguments::parse_from(["test", "-f", "test.rs"]);
+        let args = Arguments::parse_from(["test", "test.rs"]);
         assert_eq!(args.source_file, path::PathBuf::from("test.rs"));
         assert_eq!(args.stderr_file, None);
     }
 
     #[test]
     fn test_optional_argument_file() {
-        let args = Arguments::parse_from(["test", "-f", "test.rs", "-e", "test.stderr"]);
+        let args = Arguments::parse_from(["test", "test.rs", "-e", "test.stderr"]);
         assert_eq!(args.source_file, path::PathBuf::from("test.rs"));
         assert_eq!(args.stderr_file, Some(path::PathBuf::from("test.stderr")));
     }
