@@ -49,7 +49,7 @@ pub fn transform_code(code: &str, stderr_file: Option<&str>) -> Result<String> {
                 if error.relative_line_num != 0 {
                     // We simply add the error message, not to worry about the code
                     // The error was printed by our overloaded `Display` trait
-                    new_line = format!("{}", error);
+                    new_line = format!("{error}");
                 } else {
                     // For the error on the same line, we need to add error message at the end of the line
                     let captures = captures_regex
@@ -62,7 +62,7 @@ pub fn transform_code(code: &str, stderr_file: Option<&str>) -> Result<String> {
                     let before_match = &line[..whole_match.start()];
 
                     // The error was printed by our overloaded `Display` trait
-                    new_line = format!("{}{}", before_match, error);
+                    new_line = format!("{before_match}{error}");
                 }
                 break;
             }

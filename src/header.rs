@@ -84,8 +84,5 @@ fn parse_name_value_directive(line: &str, directive: &str) -> Option<String> {
 }
 
 fn to_dejagnu_edition(edition: &str) -> String {
-    format!(
-        "// {{ dg-additional-options \"-frust-edition={}\" }}",
-        edition
-    )
+    format!("// {{ dg-additional-options \"-frust-edition={edition}\" }}")
 }

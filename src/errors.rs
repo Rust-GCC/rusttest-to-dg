@@ -108,7 +108,7 @@ impl fmt::Display for Error {
         let error_code = if error_code.is_empty() {
             error_code.to_owned()
         } else {
-            format!(".{}.", error_code)
+            format!(".{error_code}.")
         };
 
         let rel_line_number = if self.relative_line_num == 0 {
