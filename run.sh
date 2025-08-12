@@ -43,9 +43,9 @@ fi
 
 
 # Copying the RUST_PATH/tests/ui to GCCRS_PATH/gcc/testsuite/rust/rustc
-echo -e "Copying tests from $RUST_PATH/tests/ui to $GCCRS_PATH/gcc/testsuite/rust/rustc"
-cp -r "$RUST_PATH"/tests/ui "$GCCRS_PATH"/gcc/testsuite/rust/rustc
-echo -e "Copied $RUST_PATH/tests/ui tests to $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
+echo -e "Copying tests from $RUST_PATH/src/test/ui to $GCCRS_PATH/gcc/testsuite/rust/rustc"
+cp -r "$RUST_PATH"/src/test/ui "$GCCRS_PATH"/gcc/testsuite/rust/rustc
+echo -e "Copied $RUST_PATH/src/test/ui tests to $GCCRS_PATH/gcc/testsuite/rust/rustc/ui"
 cd "$GCCRS_PATH"/gcc/testsuite/rust/rustc/ui
 
 process_files() {
