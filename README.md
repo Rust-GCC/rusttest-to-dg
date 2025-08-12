@@ -6,6 +6,23 @@ Converts `rustc` testcases into dejagnu testcases for `gccrs`
 
 This tool was invoked by the script [run](./run.sh). Furthermore, we need the rustc and gccrs source code to be downloaded on the system. And add their paths to the environment variables `GCCRS_PATH`, `RUST_PATH` and `RUSTTEST_TO_DG_PATH`
 
+You can install gccrs from the [gccrs repository](https://github.com/Rust-GCC/gccrs):
+
+```bash
+git clone https://github.com/Rust-GCC/gccrs.git
+```
+You can install rustc from the [rust repository](https://github.com/rust-lang/rust):
+
+```bash
+git clone https://github.com/rust-lang/rust.git
+
+# Checkout the rustc 1.49.0 version
+cd rust
+git checkout 1.49.0
+```
+
+After that, set the environment variables in your shell configuration file or in the terminal session:
+
 ```bash
 export GCCRS_PATH=/path/to/gccrs
 export RUST_PATH=/path/to/rust
