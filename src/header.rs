@@ -11,7 +11,7 @@ pub struct HeaderLine<'ln> {
     pub dejagnu_header: String,
 }
 
-pub fn parse_additional_options(code: &str) -> Vec<HeaderLine> {
+pub fn parse_additional_options(code: &str) -> Vec<HeaderLine<'_>> {
     let mut headers = Vec::new();
 
     for (line_number, line) in code.lines().enumerate() {
@@ -32,7 +32,7 @@ pub fn is_header_line(line: &str) -> bool {
     line.trim_start().starts_with("//@")
 }
 
-fn add_additional_options(code: &str, line_number: usize) -> Option<HeaderLine> {
+fn add_additional_options(code: &str, line_number: usize) -> Option<HeaderLine<'_>> {
     //TODO: If we know the file extension, then update this to
     // let comment = if testfile.extension().is_some_and(|e| e == "rs") { "//@" } else { "#" };
     let comment = "//@";
